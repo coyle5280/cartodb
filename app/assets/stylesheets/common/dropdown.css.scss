@@ -19,10 +19,9 @@
 .Dropdown {
   position: absolute;
   display: none;
-  background: $cStructure-mainBkg;
-  border-radius: 4px;
+  background:$DarkGrey7;
+  border: 1px solid #cfcfcf;
   /* x-offset, y-offset, blur, size, color */
-  box-shadow: 0 0 5px 1px rgba(black, 0.2), 0 0 1px 0 rgba(black, 0.3);
   z-index: 100000000; // to be on top of avatar and attribution overlays on public dashboard
 
   &:before {
@@ -31,15 +30,14 @@
     display: block !important;
     width: 10px;
     height: 10px;
-    background-color: $cStructure-mainBkg;
-    box-shadow: 0 0 5px 1px rgba(black, 0.2);
+    background-color: #cfcfcf;
     @include transform(rotate(45deg));
   }
   &:after {
     content: ' ';
     position: absolute;
     display: block !important;
-    background-color: $cStructure-mainBkg;
+    background-color: $DarkGrey7;
   }
 
   // Tick for 12 possibilities
@@ -151,7 +149,6 @@
 
 .Dropdown > ul > li {
   display:block;
-  border-top:1px solid $cStructure-mainLine;
   margin-top: 10px;
   padding-top: 10px;
 
