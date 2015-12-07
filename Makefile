@@ -194,6 +194,8 @@ WORKING_SPECS_carto_db_class = \
 
 CDB_PATH=lib/assets/javascripts/cdb
 
+BUNDLE_INSTALL_OPTS = BUNDLE_BUILD__FFI="--with-pkg-config=/bb/datavis/cartodb/embedded/lib/pkgconfig/"
+
 prepare-test-db:
 	# Else coverage reports add up and hits/line metric is invalid
 	rm -rf coverage
@@ -235,7 +237,8 @@ travis: check-frontend check
 
 
 # update cartodb.js submodule files
-	cd $(CDB_PATH); bundle BUNDLE_BUILD__FFI="--with-pkg-config=/bb/datavis/cartodb//embedded/lib/pkgconfig/" install
+update_cdb:
+	cd $(CDB_PATH); BUNDLE_BUILD__FFI="--with-pkg-config=/bb/datavis/cartodb/embedded/lib/pkgconfig/" bundle install
 	cd $(CDB_PATH); npm install
 	cd $(CDB_PATH); make cartodb dist/cartodb.css
 	cp $(CDB_PATH)/dist/cartodb.full.uncompressed.js vendor/assets/javascripts/cartodb.uncompressed.js
