@@ -235,8 +235,7 @@ travis: check-frontend check
 
 
 # update cartodb.js submodule files
-update_cdb:
-	cd $(CDB_PATH); bundle install
+	cd $(CDB_PATH); bundle BUNDLE_BUILD__FFI="--with-pkg-config=/bb/datavis/cartodb//embedded/lib/pkgconfig/" install
 	cd $(CDB_PATH); npm install
 	cd $(CDB_PATH); make cartodb dist/cartodb.css
 	cp $(CDB_PATH)/dist/cartodb.full.uncompressed.js vendor/assets/javascripts/cartodb.uncompressed.js
