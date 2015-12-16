@@ -1,0 +1,42 @@
+#!/bin/sh
+
+if test -n "$1"; then
+    UUID="$1"
+else
+    echo -n "Enter bloomberg uuid : "; read UUID
+fi
+
+if test -n "$2"; then
+    PASSWORD="$2"
+else
+    echo -n "Enter a password (cleartext!): "; read PASSWORD
+fi
+
+if test -n "$3"; then
+    ADMIN_PASSWORD="$3"
+else
+    echo -n "Enter an admin password (cleartext!): "; read ADMIN_PASSWORD
+fi
+
+if test -n "$4"; then
+    EMAIL="$4"
+else
+    echo -n "Enter an email: "; read EMAIL
+fi
+
+if test -n "$5"; then
+    NAME="$5"
+else
+    echo -n "Enter a display: "; read NAME
+fi
+
+echo "--- Creating user ${UUID} ${EMAIL} ${NAME}"
+bundle exec rake cartodb:db:create_dev_user --trace SUBDOMAIN="${UUID}" \
+    PASSWORD="${PASSWORD}" ADMIN_PASSWORD="${ADMIN_PASSWORD}" \
+    EMAIL="${EMAIL}"
+if test $? -ne 0; then exit 1; fi
+
+echo "---- Adding the record into user_infos ----"
+psql -U datavis_postgres -d carto_db_development -c "insert into user_infos(uuid,username,email) values(${UUID},'${UUID}','${EMAIL}');"
+psql -U datavis_postgres -d carto_db_development -c "update users set name = '${NAME}' where username = '${UUID}';"
+

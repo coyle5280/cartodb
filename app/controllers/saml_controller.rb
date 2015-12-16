@@ -3,6 +3,7 @@ require 'yaml'
 class SamlController < ApplicationController
  layout 'frontend'
 
+ before_filter :load_organization
  # acs method
  def initialize
    @signup_source = 'SAML Sign-On'
@@ -10,47 +11,65 @@ class SamlController < ApplicationController
  end
 
  def acs
-    logger.info "inside saml acs"
-    
-    begin 
-      load_organization(params[:saml_idp])
+    logger.info "inside smal acs"
 
-      user_info = SamlAuthenticator.get_user_info(params)
-      raise "No user information available." unless user_info != nil
-
-      scope = user_info.cartodb_username
-
-      user = authenticate!(:saml_header, {}, :scope => scope) unless authenticated?(scope)
-      raise "Athentication failed with SAML" unless user != nil
-    
-      redirect_to CartoDB.url(self, 'dashboard', {trailing_slash: true}, user)
-      
-    rescue Exception => e
-        logger.error e.message
-        @signup_source = 'Saml'
-        @signup_errors[:saml_error] = [e.message]
-      
-        render 'shared/signup_issue'
+    user_info = SamlAuthenticator.get_user_info(params)
+    if user_info == nil
+       @organization = BBOrganization.new
+       @signup_errors[:saml_error] = ["You are not authorized to run the functionality"]
+       logger.error @signup_errors[:saml_error].first
+       render 'shared/signup_issue'
+       return
     end
+
+    scope = user_info.username
+
+    logger.info "uuid after calling Saml " + scope
+
+    user = authenticate!(:saml_header, {}, :scope => scope) unless authenticated?(scope)
+
+    if user == nil
+      @organization = BBOrganization.new
+      @signup_errors[:saml_error] = ["Single sing on athentication failed."]
+      logger.error @signup_errors[:saml_error].first
+      render 'shared/signup_issue'
+    end
+
+    redirect_to CartoDB.url(self, 'dashboard', {trailing_slash: true}, user)
+
  end
 
- def load_organization(saml_idp)
-
-    @organization = Carto::Organization.where(saml_idp_name: saml_idp).first 
-
-    # At this point, we are support SAML authentication only for the users 
-    # belonging to an organization
-    
-    if (@organization == nil)
-      raise "SAML authentication needs to have an associated organization"
-    end
-
-    @org_admin = Carto::User.where(id:@organization.owner_id).first 
-    
-    if (@org_admin == nil)
-      raise "SAML authentication needs to have an organization admin user"
-    end
-
+ def load_organization
+    subdomain = CartoDB.subdomain_from_request(request)
+    @organization = Carto::Organization.where(name: subdomain).first if subdomain
  end
+
 
 end #end of the controller class
+
+class UserInfo < Sequel::Model
+end
+
+class BBOrganization
+  class BBOwner
+    def email
+     "bshaklton@bloomberg.net"
+    end
+  end
+
+  def initialize
+  @owner = BBOwner.new
+  end
+
+  def name
+     "PWHO BMAP"
+  end
+  def color
+     "#FF5522"
+  end
+  def owner
+     @owner
+  end
+end
+
+

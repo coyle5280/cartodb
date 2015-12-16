@@ -1,0 +1,12 @@
+ l_autheticator.rb  warden_saml.rb  aml_controller.rb  up_issue.html.erb  te_bloomberg_user  /bb_user_info.dll     X
+--- Run it as : psql -U postgres -d carto_db_development -f ./bb_user_info.ddl
+--- This is username-uuid mapping table
+--- to get username for given uuid, run SQL e.g. - select username from user_infos where uuid='whateveruuid';
+--- to insert a record: e.g. - insert into user_infos(uuid,username,email) values(2915983,'vmanohar1','vmanohar1@bloomberg.net');
+CREATE TABLE user_infos (
+  uuid   integer PRIMARY KEY,
+  username text,
+  email text,
+  UNIQUE(username)
+);
+
