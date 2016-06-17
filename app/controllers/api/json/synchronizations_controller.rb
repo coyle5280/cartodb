@@ -19,6 +19,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
     @stats_aggregator.timing('synchronizations.create') do
 
       begin
+        # TODO: Explore entry point for data library import
         external_source = nil
 
         member_attributes = setup_member_attributes
@@ -140,7 +141,8 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
   private
 
   def set_external_source
-    @external_source = params[:remote_visualization_id].present? ? 
+    # QUESTION: Is this used? Could this be a valid hook?
+    @external_source = params[:remote_visualization_id].present? ?
                                                 get_external_source(params[:remote_visualization_id]) : nil
   end
 
@@ -183,6 +185,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
       service_item_id = params[:url].presence
     end
 
+    # TODO: Add flag here for FDW datasource?
     options = {
       user_id:                current_user.id,
       table_name:             params[:table_name].presence,
@@ -218,6 +221,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
   end
 
   def get_external_source(remote_visualization_id)
+    # TODO: Is a data library dataset the only case of an external source?
     external_source = CartoDB::Visualization::ExternalSource.where(visualization_id: remote_visualization_id).first
     unless remote_visualization_id.present? && external_source.importable_by(current_user)
       raise CartoDB::Datasources::AuthError.new('Illegal external load')

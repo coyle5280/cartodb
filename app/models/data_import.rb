@@ -98,6 +98,7 @@ class DataImport < Sequel::Model
   TYPE_EXTERNAL_TABLE = 'external_table'
   TYPE_FILE           = 'file'
   TYPE_URL            = 'url'
+  TYPE_FDW            = 'fdw'
   TYPE_QUERY          = 'query'
   TYPE_DATASOURCE     = 'datasource'
 
@@ -270,6 +271,7 @@ class DataImport < Sequel::Model
 
   def data_source=(data_source)
     path = Rails.root.join("public#{data_source}").to_s
+    # TODO: Handle FDW datasource
     if data_source.nil?
       self.values[:data_type] = TYPE_DATASOURCE
       self.values[:data_source] = ''

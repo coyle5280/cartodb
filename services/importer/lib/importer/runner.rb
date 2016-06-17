@@ -1,5 +1,6 @@
 # encoding: utf-8
 require_relative './loader'
+require_relative './fdw_loader'
 require_relative './tiff_loader'
 require_relative './sql_loader'
 require_relative './unp'
@@ -19,7 +20,7 @@ module CartoDB
       QUOTA_MAGIC_NUMBER      = 0.3
 
       DEFAULT_AVAILABLE_QUOTA = 2 ** 30
-      LOADERS                 = [Loader, TiffLoader]
+      LOADERS                 = [Loader, FdwLoader, TiffLoader]
       DEFAULT_LOADER          = Loader
       UNKNOWN_ERROR_CODE      = 99999
 

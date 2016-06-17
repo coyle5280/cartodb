@@ -38,6 +38,8 @@ module CartoDB
           end
 
           case datasource_name
+            # TODO: New case for custom FDW datasource, probably does nothing other than
+            # parse a url schema?
             when Url::Dropbox::DATASOURCE_NAME
               Url::Dropbox.get_new(DatasourcesFactory.config_for(datasource_name, user), user)
             when Url::Box::DATASOURCE_NAME
