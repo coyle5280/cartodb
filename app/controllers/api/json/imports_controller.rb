@@ -38,7 +38,6 @@ class Api::Json::ImportsController < Api::ApplicationController
 
         options = default_creation_options
 
-        logger.info "IMPORTER DEBUG: #{params}"
         if params[:url].present?
           validate_url!(params.fetch(:url)) unless Rails.env.development? || Rails.env.test?
           options.merge!(data_source: params.fetch(:url))

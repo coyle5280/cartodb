@@ -20,6 +20,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
 
       begin
         # TODO: Explore entry point for data library import
+        logger.info "IMPORTER DEBUG: #{params}"
         external_source = nil
 
         member_attributes = setup_member_attributes
@@ -29,6 +30,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
         end
 
         options = setup_data_import_options(member_attributes, member.id)
+        logger.info "IMPORTER DEBUG: options #{options}"
         data_import = @stats_aggregator.timing('save') do
           DataImport.create(options)
         end
@@ -157,6 +159,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
             content_guessing:       ["true", true].include?(params[:content_guessing])
         )
 
+    logger.info "IMPORTER DEBUG: member_attributes #{member_attributes}"
     if from_sync_file_provider?
       member_attributes = member_attributes.merge({
               service_name: params[:service_name],
@@ -165,6 +168,7 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
     end
 
     if params[:remote_visualization_id].present?
+      logger.info "IMPORTER DEBUG: has remote_visualization_id"
       member_attributes[:interval] = Carto::ExternalSource::REFRESH_INTERVAL
       external_source = @external_source
       member_attributes.merge!( {
@@ -172,11 +176,15 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
         service_item_id: external_source.import_url.presence
         } )
       if params[:fdw].present?
+        logger.info "IMPORTER DEBUG: has fdw"
         member_attributes[:service_name] = "fdw"
         member_attributes[:service_item_id] = "FDW:#{params[:fdw]}"
+        params[:service_name] = "fdw"
+        params[:service_item_id] = "FDW:#{params[:fdw]}"
       end
     end
 
+    logger.info "IMPORTER DEBUG: #{member_attributes}"
     member_attributes
   end
 
