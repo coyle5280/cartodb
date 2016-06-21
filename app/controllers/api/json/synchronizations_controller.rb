@@ -171,6 +171,10 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
         url: external_source.import_url.presence,
         service_item_id: external_source.import_url.presence
         } )
+      if params[:fdw].present?
+        member_attributes[:service_name] = "fdw"
+        member_attributes[:service_item_id] = "FDW:#{params[:fdw]}"
+      end
     end
 
     member_attributes
@@ -185,7 +189,6 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
       service_item_id = params[:url].presence
     end
 
-    # TODO: Add flag here for FDW datasource?
     options = {
       user_id:                current_user.id,
       table_name:             params[:table_name].presence,

@@ -38,10 +38,15 @@ class Api::Json::ImportsController < Api::ApplicationController
 
         options = default_creation_options
 
+        logger.info "IMPORTER DEBUG: #{params}"
         if params[:url].present?
           validate_url!(params.fetch(:url)) unless Rails.env.development? || Rails.env.test?
           options.merge!(data_source: params.fetch(:url))
         elsif params[:remote_visualization_id].present?
+          if params[:fdw].present?
+            options[:service_name] = "fdw"
+            options[:service_item_id] = "FDW:#{params[:fdw]}"
+          end
           external_source = external_source(params[:remote_visualization_id])
           options.merge!( { data_source: external_source.import_url.presence } )
         else

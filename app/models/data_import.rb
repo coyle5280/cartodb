@@ -174,6 +174,8 @@ class DataImport < Sequel::Model
   end
 
   def run_import!
+    print "DATA IMPORT: service name = #{self.service_name}\n"
+    print "DATA IMPORT: service item id = #{self.service_item_id}\n"
     self.resque_ppid = Process.ppid
     self.server = Socket.gethostname
     log.append "Running on server #{self.server} with PID: #{Process.pid}"
