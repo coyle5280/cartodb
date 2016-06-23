@@ -752,6 +752,10 @@ class DataImport < Sequel::Model
       tracker = lambda do |state|
         self.state = state
         save
+      end
+      log.append 'Before importer run'
+      importer.run(tracker)
+      log.append 'After importer run'
     end
     store_results(importer, runner, datasource_provider, manual_fields)
 
