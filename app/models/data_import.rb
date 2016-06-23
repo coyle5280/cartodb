@@ -22,6 +22,7 @@ require_relative '../../services/importer/lib/importer/unp'
 require_relative '../../services/importer/lib/importer/post_import_handler'
 require_relative '../../services/importer/lib/importer/mail_notifier'
 require_relative '../../services/importer/lib/importer/cartodbfy_time'
+require_relative '../../services/importer/lib/importer/fdw_runner'
 require_relative '../../services/platform-limits/platform_limits'
 require_relative '../../services/importer/lib/importer/overviews'
 
@@ -620,47 +621,57 @@ class DataImport < Sequel::Model
     had_errors = false
     log.append 'new_importer()'
 
-    datasource_provider = get_datasource_provider
+    post_import_handler = CartoDB::Importer2::PostImportHandler.new
 
-    # If retrieving metadata we get an error, fail early
-    begin
-      @downloader = get_downloader(datasource_provider)
-    rescue DataDownloadError => ex
-      had_errors = true
-      manual_fields = {
-        error_code: 1012,
-        log_info: ex.to_s
-      }
-    rescue ResponseError => ex
-      had_errors = true
-      manual_fields = {
-        error_code: 1011,
-        log_info: ex.to_s
-      }
-    rescue InvalidServiceError => ex
-      had_errors = true
-      manual_fields = {
-        error_code: 1013,
-        log_info: ex.to_s
-      }
-    rescue InvalidInputDataError => ex
-      had_errors = true
-      manual_fields = {
-        error_code: 1012,
-        log_info: ex.to_s
-      }
-    rescue CartoDB::Importer2::FileTooBigError => ex
-      had_errors = true
-      manual_fields = {
-        error_code: ex.error_code,
-        log_info: CartoDB::IMPORTER_ERROR_CODES[ex.error_code]
-      }
-    rescue => ex
-      had_errors = true
-      manual_fields = {
-        error_code: 99999,
-        log_info: ex.to_s
-      }
+    if service_name != 'fdw'
+      datasource_provider = get_datasource_provider
+      case datasource_provider.class::DATASOURCE_NAME
+        when Url::ArcGIS::DATASOURCE_NAME
+          post_import_handler.add_fix_geometries_task
+        when Search::Twitter::DATASOURCE_NAME
+          post_import_handler.add_transform_geojson_geom_column
+      end
+
+      # If retrieving metadata we get an error, fail early
+      begin
+        @downloader = get_downloader(datasource_provider)
+      rescue DataDownloadError => ex
+        had_errors = true
+        manual_fields = {
+          error_code: 1012,
+          log_info: ex.to_s
+        }
+      rescue ResponseError => ex
+        had_errors = true
+        manual_fields = {
+          error_code: 1011,
+          log_info: ex.to_s
+        }
+      rescue InvalidServiceError => ex
+        had_errors = true
+        manual_fields = {
+          error_code: 1013,
+          log_info: ex.to_s
+        }
+      rescue InvalidInputDataError => ex
+        had_errors = true
+        manual_fields = {
+          error_code: 1012,
+          log_info: ex.to_s
+        }
+      rescue CartoDB::Importer2::FileTooBigError => ex
+        had_errors = true
+        manual_fields = {
+          error_code: ex.error_code,
+          log_info: CartoDB::IMPORTER_ERROR_CODES[ex.error_code]
+        }
+      rescue => ex
+        had_errors = true
+        manual_fields = {
+          error_code: 99999,
+          log_info: ex.to_s
+        }
+      end
     end
 
     if had_errors
@@ -671,30 +682,30 @@ class DataImport < Sequel::Model
         save
       }
 
-      post_import_handler = CartoDB::Importer2::PostImportHandler.new
-      case datasource_provider.class::DATASOURCE_NAME
-        when Url::ArcGIS::DATASOURCE_NAME
-          post_import_handler.add_fix_geometries_task
-        when Search::Twitter::DATASOURCE_NAME
-          post_import_handler.add_transform_geojson_geom_column
-      end
-
       database_options = pg_options
       self.host = database_options[:host]
 
-      @unpacker = CartoDB::Importer2::Unp.new(Cartodb.config[:importer])
-
-      runner = CartoDB::Importer2::Runner.new({
-                                                pg: database_options,
-                                                downloader: @downloader,
-                                                log: log,
-                                                user: current_user,
-                                                unpacker: @unpacker,
-                                                post_import_handler: post_import_handler,
-                                                importer_config: Cartodb.config[:importer]
-                                              })
-      runner.loader_options = ogr2ogr_options.merge content_guessing_options
-      runner.set_importer_stats_host_info(Socket.gethostname)
+      if service_name == 'fdw'
+        runner = CartoDB::Importer2::FDWRunner.new({
+                                                     pg: database_options,
+                                                     log: log,
+                                                     user: current_user,
+                                                     importer_config: Cartodb.config[:importer]
+                                                   })
+      else
+        @unpacker = CartoDB::Importer2::Unp.new(Cartodb.config[:importer])
+        runner = CartoDB::Importer2::Runner.new({
+                                                  pg: database_options,
+                                                  downloader: @downloader,
+                                                  log: log,
+                                                  user: current_user,
+                                                  unpacker: @unpacker,
+                                                  post_import_handler: post_import_handler,
+                                                  importer_config: Cartodb.config[:importer]
+                                                })
+        runner.loader_options = ogr2ogr_options.merge content_guessing_options
+        runner.set_importer_stats_host_info(Socket.gethostname)
+      end
       registrar     = CartoDB::TableRegistrar.new(current_user, ::Table)
       quota_checker = CartoDB::QuotaChecker.new(current_user)
       database      = current_user.in_database
@@ -732,7 +743,7 @@ class DataImport < Sequel::Model
       self.runner_warnings = runner.warnings.to_json if !runner.warnings.empty?
 
       # http_response_code is only relevant if a direct download is performed
-      if !runner.nil? && datasource_provider.providers_download_url?
+      if runner && datasource_provider && datasource_provider.providers_download_url?
         self.http_response_code = runner.downloader.http_response_code
       end
 
@@ -790,6 +801,7 @@ class DataImport < Sequel::Model
   end
 
   def get_datasource_provider
+    return nil if service_name == 'fdw'
     datasource_name = (service_name.nil? || service_name.size == 0) ? Url::PublicUrl::DATASOURCE_NAME : service_name
     if service_item_id.nil? || service_item_id.size == 0
       self.service_item_id = data_source
@@ -895,7 +907,7 @@ class DataImport < Sequel::Model
     if data_import.success && data_import.table_id && data_import.migrate_table.nil? && data_import.from_query.nil? &&
        data_import.table_copy.nil?
       datasource = get_datasource_provider
-      if datasource.persists_state_via_data_import?
+      if datasource && datasource.persists_state_via_data_import?
         decoration = datasource.get_audit_stats
       end
     end
@@ -974,14 +986,14 @@ class DataImport < Sequel::Model
   end
 
   def set_datasource_audit_to_complete(datasource, table_id = nil)
-    if datasource.persists_state_via_data_import?
+    if datasource && datasource.persists_state_via_data_import?
       datasource.data_import_item = self
       datasource.set_audit_to_completed(table_id)
     end
   end
 
   def set_datasource_audit_to_failed(datasource)
-    if datasource.persists_state_via_data_import?
+    if datasource && datasource.persists_state_via_data_import?
       datasource.data_import_item = self
       datasource.set_audit_to_failed
     end
