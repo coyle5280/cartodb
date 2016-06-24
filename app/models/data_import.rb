@@ -24,7 +24,7 @@ require_relative '../../services/importer/lib/importer/mail_notifier'
 require_relative '../../services/importer/lib/importer/cartodbfy_time'
 require_relative '../../services/platform-limits/platform_limits'
 require_relative '../../services/importer/lib/importer/overviews'
-require_relative '../../services/importer/lib/importer/connector'
+require_relative '../../services/importer/lib/importer/connectors/postgres_connector'
 
 require_relative '../../lib/cartodb/event_tracker'
 
@@ -725,7 +725,7 @@ class DataImport < Sequel::Model
 
     self.host = database_options[:host]
 
-    connector = CartoDB::Importer2::Connector.new(
+    connector = CartoDB::Importer2::PostgresConnector.new(
       service_item_id,
       user: current_user,
       pg: database_options,

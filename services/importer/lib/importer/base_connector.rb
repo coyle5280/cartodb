@@ -4,7 +4,7 @@ require_relative './exceptions'
 
 module CartoDB
   module Importer2
-    class Connector
+    class BaseConnector
       # Requirements:
       #   * odbc_fdw extension must be installed in the user database
 
@@ -12,6 +12,8 @@ module CartoDB
       # * connector channel (ODBC, ...)
       # * provider          (MySQL, ...)     [driver]
       # * connection        (database/query) [specific data source]
+
+      CHANNEL_NAME = 'odbc_fdw'
 
       class ConnectorError < StandardError
         attr_reader :channel_name, :user_name
@@ -36,7 +38,7 @@ module CartoDB
       end
 
       attr_reader :results, :log, :job
-      attr_accessor :stats
+      attr_accessor :channel, :stats
 
       # @param connector_source string
       #     of the form #{channel}:key1=value1;key2=value2...keyn=valuen
@@ -48,12 +50,14 @@ module CartoDB
 
         @id = @job.id
         @unique_suffix = @id.delete('-')
-        channel, conn_str = connector_source.split(':')
-        raise InvalidChannelError.new(channel, @user) unless channel.casecmp('postgres') == 0
+        @channel, conn_str = connector_source.split(':')
+        raise InvalidChannelError.new(@channel, @user) unless @channel.casecmp(CHANNEL_NAME) == 0
         @conn_str = conn_str
         extract_params
         validate_params!
+        print "IMPORTER: params #{@params}\n"
         @schema = @user.database_schema
+        print "IMPORTER: schemas #{@schema}, #{@job.schema}\n"
         @results = []
         @tracker = nil
         @stats = {}
@@ -157,7 +161,7 @@ module CartoDB
            (@params['driver'].blank? || @params['database'].blank? || @params['table'].blank?)
           errors << "Missing required parameters"
         end
-        errors << "Missing columns definition" unless @columns.present?
+        #errors << "Missing columns definition" unless @columns.present?
         invalid_params = @params.keys - ACCEPTED_PARAMETERS
         errors << "Invalid parameters: #{invalid_params * ', '}" if invalid_params.present?
         raise InvalidParametersError.new(errors * "\n") if errors.present?
@@ -168,31 +172,40 @@ module CartoDB
       end
 
       def server_name
-        "connector_#{connector_name}_#{@unique_suffix}"
+        v = "connector_#{connector_name}_#{@unique_suffix}"
+        print "IMPORTER: server_name #{v}"
+        v
       end
 
       def foreign_table_name
-        "#{server_name}_#{@params['table']}"
+        v = "#{server_name}_#{@params['table']}"
+        print "IMPORTER: foreign_table_name #{v}"
+        v
       end
 
       def create_server_command
         options = server_params.map { |k, v| "#{k} '#{v}'" } * ",\n"
-        %{
+        v = %{
           CREATE SERVER #{server_name}
-            FOREIGN DATA WRAPPER odbc_fdw
+            FOREIGN DATA WRAPPER #{@channel}
             OPTIONS (#{options});
           CREATE USER MAPPING FOR "#{@user.database_username}" SERVER #{server_name};
         }
+        print "IMPORTER: create_server_command #{v}"
+        v
       end
 
       def create_foreign_table_command
         options = table_params.map { |k, v| "#{k} '#{v}'" } * ",\n"
-        %{
+        print "IMPORTER: foreign table options: #{options}"
+        v = %{
           CREATE FOREIGN TABLE #{foreign_table_name} (#{@columns * ','})
             SERVER #{server_name}
             OPTIONS (#{options});
           GRANT SELECT ON #{foreign_table_name} TO "#{@user.database_username}";
         }
+        print "IMPORTER: create_foreign_table_command #{v}"
+        v
       end
 
       def drop_server_command
