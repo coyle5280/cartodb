@@ -6,6 +6,7 @@ require_relative '../visualization/collection'
 require_relative '../../../services/importer/lib/importer/datasource_downloader'
 require_relative '../../../services/datasources/lib/datasources'
 require_relative '../log'
+require_relative '../../../services/importer/lib/importer/connectors/postgres_connector'
 require_relative '../../../services/importer/lib/importer/unp'
 require_relative '../../../services/importer/lib/importer/post_import_handler'
 require_relative '../../../lib/cartodb/errors'
@@ -278,7 +279,7 @@ module CartoDB
       end
 
       def get_connector
-        CartoDB::Importer2::Connector.new(service_item_id, user: user, pg: pg_options, log: log)
+        CartoDB::Importer2::PostgresConnector.new(service_item_id, user: user, pg: pg_options, log: log)
       end
 
       def notify
