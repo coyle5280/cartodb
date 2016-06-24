@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-require_relative './exceptions'
-
 module CartoDB
   module Importer2
     class PostgresConnector < BaseConnector
@@ -13,86 +11,66 @@ module CartoDB
       # * provider          (MySQL, ...)     [driver]
       # * connection        (database/query) [specific data source]
 
-      CHANNEL_NAME = 'postgres_fdw'
-
-      def tracker
-        @tracker || lambda { |state| state }
-      end
-
-      def visualizations
-        []
-      end
-
-      def warnings
-        []
+      def channel_name
+        'postgres_fdw'
       end
 
       private
 
-      ACCEPTED_PARAMETERS = %w(host port database table username password).freeze
-      SERVER_OPTIONS = %w(host port database).freeze
+      def accepted_parameters
+        %w(driver channel host port database table username password)
+      end
 
-      def connector_name
-        'postgres'
+      def server_options
+        %w(host port database)
       end
 
       def foreign_table_name
         v = @params['table']
-        print "IMPORTER: foreign_table_name #{v}"
+        print "IMPORTER: foreign_table_name #{v}\n"
+        v
+      end
+
+      def create_server_command
+        v = %{
+          CREATE SERVER #{server_name}
+            FOREIGN DATA WRAPPER #{@params['channel']}
+            OPTIONS (
+              host '#{server_params['host']}',
+              dbname '#{server_params['database']}',
+              port '#{server_params['port']}'
+            );
+        }
+        print "IMPORTER: create_server_command #{v}\n"
+        v
+      end
+
+      def create_user_mapping_command
+        v = %{
+          CREATE USER MAPPING FOR "#{@user.database_username}" SERVER #{server_name}
+            OPTIONS ( user '#{@params['username']}', password '#{@params['password']}');
+          CREATE USER MAPPING FOR "postgres" SERVER #{server_name}
+            OPTIONS ( user '#{@params['username']}', password '#{@params['password']}')
+        }
+        print "IMPORTER: create_user_mapping_command #{v}\n"
         v
       end
 
       def create_foreign_table_command
         v = %{
-          IMPORT FOREIGN SCHEMA IF NOT EXISTS #{@schema} LIMIT TO (#{foreign_table_name})
+          IMPORT FOREIGN SCHEMA #{@schema} LIMIT TO (#{foreign_table_name})
             FROM SERVER #{server_name} INTO #{@schema}
         }
-        print "IMPORTER: create_foreign_table_command #{v}"
+        print "IMPORTER: create_foreign_table_command #{v}\n"
         v
       end
 
-      def drop_server_command
-        "DROP SERVER IF EXISTS #{server_name} CASCADE;"
+      def run_post_create
+        print "IMPORTER: NOOP run_post_create\n"
       end
 
-      def drop_foreign_table_command
-        "DROP FOREIGN TABLE IF EXISTS #{foreign_table_name} CASCADE;"
-      end
-
-      def execute_as_superuser(command)
-        @user.in_database(as: :superuser).execute command
-      end
-
-      def execute(command)
-        @user.in_database.execute command
-      end
-
-      def result_for(schema, table_name, error = nil)
-        @job.success_status = !error
-        @job.logger.store
-        Result.new(
-          name:           @params['table'],
-          schema:         schema,
-          tables:         [table_name],
-          success:        @job.success_status,
-          error_code:     error_for(error),
-          log_trace:      @job.logger.to_s,
-          support_tables: []
-        )
-      end
-
-      def new_logger
-        CartoDB::Log.new(type: CartoDB::Log::TYPE_DATA_IMPORT)
-      end
-
-      def new_job(log, pg_options)
-        Job.new(logger: log, pg_options: pg_options)
-      end
-
-      UNKNOWN_ERROR_CODE = 99999
-
-      def error_for(exception)
-        exception && ERRORS_MAP.fetch(exception.class, UNKNOWN_ERROR_CODE)
+      def run_post_create_ensure
+        print "IMPORTER: NOOP run_post_create_ensure\n"
       end
     end
   end

@@ -171,9 +171,9 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
       member_attributes[:service_item_id] = external_source.import_url.presence
     end
 
-    if params[:fdw].present? && params[:fdw_type].present?
+    if params[:fdw].present?
       member_attributes[:service_name] = 'connector'
-      member_attributes[:service_item_id] = "#{params[:fdw_type]}:#{params[:fdw]}"
+      member_attributes[:service_item_id] = params[:fdw]
     end
 
     member_attributes
@@ -202,9 +202,9 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
     if params[:remote_visualization_id].present?
       external_source = get_external_source(params[:remote_visualization_id])
       options.merge!( { data_source: external_source.import_url.presence } )
-    elsif params[:fdw].present? && params[:fdw_type].present?
+    elsif params[:fdw].present?
       options[:service_name] = 'connector'
-      options[:service_item_id] = "#{params[:fdw_type]}:#{params[:fdw]}"
+      options[:service_item_id] = params[:fdw]
     else
       url = params[:url]
       validate_url!(url) unless Rails.env.development? || Rails.env.test? || url.nil? || url.empty?
