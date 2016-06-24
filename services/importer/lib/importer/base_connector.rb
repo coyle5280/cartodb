@@ -73,13 +73,13 @@ module CartoDB
         # TODO: logging with CartoDB::Logger
         @job.log "Creating Server"
         print "IMPORTER: creating server\n"
-        execute_as_superuser create_server_command
+        run_create_server
         @job.log "Creating user mapping"
         print "IMPORTER: creating user mapping\n"
-        execute_as_superuser create_user_mapping_command
+        run_create_user_mapping
         @job.log "Creating Foreign Table"
         print "IMPORTER: creating foreign table\n"
-        execute_as_superuser create_foreign_table_command
+        run_create_foreign_table
         @job.log "Running post create"
         print "IMPORTER: running post create\n"
         run_post_create
@@ -200,6 +200,10 @@ module CartoDB
         v
       end
 
+      def run_create_server
+        execute_as_superuser create_server_command
+      end
+
       def create_server_command
         options = server_params.map { |k, v| "#{k} '#{v}'" } * ",\n"
         v = %{
@@ -211,12 +215,20 @@ module CartoDB
         v
       end
 
+      def run_create_user_mapping
+        execute_as_superuser create_user_mapping_command
+      end
+
       def create_user_mapping_command
         v = %{
           CREATE USER MAPPING FOR "#{@user.database_username}" SERVER #{server_name};
         }
         print "IMPORTER: create_user_mapping_command #{v}\n"
         v
+      end
+
+      def run_create_foreign_table
+        execute_as_superuser create_foreign_table_command
       end
 
       def create_foreign_table_command
