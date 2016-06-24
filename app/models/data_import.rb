@@ -4,6 +4,7 @@ require 'fileutils'
 require 'uuidtools'
 require_relative './user'
 require_relative './table'
+require_relative './fdw_table'
 require_relative './log'
 require_relative './visualization/member'
 require_relative './table_registrar'
@@ -732,7 +733,7 @@ class DataImport < Sequel::Model
       log: log
     )
 
-    registrar     = CartoDB::TableRegistrar.new(current_user, ::Table)
+    registrar     = CartoDB::TableRegistrar.new(current_user, ::FDWTable)
     quota_checker = CartoDB::QuotaChecker.new(current_user)
     database      = current_user.in_database
     destination_schema = current_user.database_schema

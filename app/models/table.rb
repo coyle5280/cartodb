@@ -364,6 +364,7 @@ class Table
 
     # The Table model only migrates now, never imports
     if migrate_existing_table.present?
+      print "IMPORTER: migrate_existing_table.present? == true\n"
       if @user_table.data_import_id.nil? #needed for non ui-created tables
         @data_import  = DataImport.new(:user_id => self.user_id)
         @data_import.updated_at = Time.now
@@ -388,6 +389,7 @@ class Table
       @data_import.save
     else
       if !register_table_only.present?
+        print "IMPORTER: register_table_only.present? == false\n"
         create_table_in_database!
         set_the_geom_column!(self.the_geom_type)
         self.cartodbfy
@@ -721,10 +723,12 @@ class Table
   end
 
   def schema(options = {})
+    print "IMPORTER: #{owner}"
     first_columns     = []
     middle_columns    = []
     last_columns      = []
     owner.in_database.schema(name, options.slice(:reload).merge(schema: owner.database_schema)).each do |column|
+      print "IMPORTER: #{column}"
       next if column[0] == THE_GEOM_WEBMERCATOR
 
       calculate_the_geom_type if column[0] == :the_geom
