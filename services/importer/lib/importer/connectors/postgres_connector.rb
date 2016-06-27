@@ -97,6 +97,7 @@ module CartoDB
         v = %{
           IMPORT FOREIGN SCHEMA #{@schema} LIMIT TO (#{foreign_table_name})
             FROM SERVER #{server_name} INTO #{@schema};
+          ALTER FOREIGN TABLE #{foreign_table_name} OWNER TO "#{@user.database_username}";
           GRANT SELECT ON #{@schema}.#{foreign_table_name} TO publicuser;
         }
         print "IMPORTER: create_foreign_table_command #{v}\n"
