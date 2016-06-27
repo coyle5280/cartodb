@@ -81,6 +81,15 @@ module CartoDB
       end
 
       def run_create_foreign_table
+        begin
+            execute_as_superuser %{select '#{@schema}.cdb_tablemetadata'::regclass}
+        rescue => e
+            execute_as_superuser %{
+              IMPORT FOREIGN SCHEMA cartodb LIMIT TO (cdb_tablemetadata)
+                FROM SERVER #{server_name} INTO #{@schema};
+              GRANT SELECT ON #{@schema}.cdb_tablemetadata TO publicuser;
+            }
+        end
         execute_as_superuser create_foreign_table_command
       end
 
