@@ -32,7 +32,7 @@ module CartoDB
       end
 
       def run_create_server
-        execute create_server_command
+        execute_as_superuser create_server_command
       end
 
       def create_server_command
@@ -50,12 +50,14 @@ module CartoDB
       end
 
       def run_create_user_mapping
-        execute create_user_mapping_command
+        execute_as_superuser create_user_mapping_command
       end
 
       def create_user_mapping_command
         v = %{
           CREATE USER MAPPING FOR "#{@user.database_username}" SERVER #{server_name}
+            OPTIONS ( user '#{@params['username']}', password '#{@params['password']}');
+          CREATE USER MAPPING FOR "postgres" SERVER #{server_name}
             OPTIONS ( user '#{@params['username']}', password '#{@params['password']}');
         }
         print "IMPORTER: create_user_mapping_command #{v}\n"
@@ -63,13 +65,14 @@ module CartoDB
       end
 
       def run_create_foreign_table
-        execute create_foreign_table_command
+        execute_as_superuser create_foreign_table_command
       end
 
       def create_foreign_table_command
         v = %{
           IMPORT FOREIGN SCHEMA #{@schema} LIMIT TO (#{foreign_table_name})
-            FROM SERVER #{server_name} INTO #{@schema}
+            FROM SERVER #{server_name} INTO #{@schema};
+          GRANT SELECT ON #{@schema}.#{foreign_table_name} TO publicuser;
         }
         print "IMPORTER: create_foreign_table_command #{v}\n"
         v
