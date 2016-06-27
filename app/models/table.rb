@@ -580,7 +580,15 @@ class Table
         CartoDB::StdoutLogger.info 'Table#after_destroy error', "maybe table #{qualified_table_name} doesn't exist: #{e.inspect}"
       end
       Carto::OverviewsService.new(user_database).delete_overviews qualified_table_name
-      user_database.run(%{DROP TABLE IF EXISTS #{qualified_table_name}})
+      begin
+        user_database.run(%{DROP TABLE IF EXISTS #{qualified_table_name}})
+      rescue => e
+        if e.message.include? "DROP FOREIGN TABLE"
+          user_database.run(%{DROP FOREIGN TABLE IF EXISTS #{qualified_table_name}})
+        else
+          raise e
+        end
+      end
     end
   end
 
