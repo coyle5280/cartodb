@@ -101,16 +101,15 @@ module CartoDB
 
       def run_post_create
         # Ensure here that the remote cdb_tablemetadata are imported
-        for tabname in ['cdb_tablemetadata', 'cdb_tablemetadata_text']
-          begin
-            execute_as_superuser %{select '#{@schema}.#{tabname}'::regclass}
-          rescue => e
-            execute_as_superuser %{
-              IMPORT FOREIGN SCHEMA cartodb LIMIT TO (#{tabname})
-                FROM SERVER #{server_name} INTO #{@schema};
-              GRANT SELECT ON #{@schema}.#{tabname} TO publicuser;
-            }
-          end
+        begin
+          execute_as_superuser %{select '#{@schema}.cdb_tablemetadata'::regclass}
+        rescue => e
+          execute_as_superuser %{
+            CREATE FOREIGN TABLE #{@schema}.cdb_tablemetadata (tabname text, updated_at timestamp with time zone)
+              SERVER #{server_name}
+              OPTIONS (table_name 'cdb_tablemetadata_text', schema_name 'cartodb', updatable 'false');
+            GRANT SELECT ON #{@schema}.cdb_tablemetadata TO publicuser;
+          }
         end
       end
 
