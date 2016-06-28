@@ -71,6 +71,8 @@ module CartoDB
         @job.log "Connector #{@conn_str}"
         # TODO: deal with schemas, org users, etc.,
         # TODO: logging with CartoDB::Logger
+        @job.log "Running pre-create tasks"
+        run_pre_create
         @job.log "Creating Server"
         print "IMPORTER: creating server\n"
         run_create_server
@@ -242,6 +244,10 @@ module CartoDB
         }
         print "IMPORTER: create_foreign_table_command #{v}\n"
         v
+      end
+
+      def run_pre_create
+        # NOOP by default
       end
 
       def run_post_create

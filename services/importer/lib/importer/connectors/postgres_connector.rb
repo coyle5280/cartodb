@@ -41,12 +41,20 @@ module CartoDB
         v
       end
 
+      def run_pre_create
+        run_create_extension
+      end
+
       def run_create_server
         server_count = execute_as_superuser %{SELECT * from pg_foreign_server WHERE srvname = '#{server_name}'}
         print "IMPORTER: server_count #{server_count.class} #{server_count}\n"
         if server_count == 0
           execute_as_superuser create_server_command
         end
+      end
+
+      def run_create_extension
+        execute_as_superuser %{ CREATE EXTENSION IF NOT EXISTS #{channel_name} }
       end
 
       def create_server_command
@@ -80,19 +88,6 @@ module CartoDB
         end
       end
 
-      def run_create_foreign_table
-        begin
-            execute_as_superuser %{select '#{@schema}.cdb_tablemetadata'::regclass}
-        rescue => e
-            execute_as_superuser %{
-              IMPORT FOREIGN SCHEMA cartodb LIMIT TO (cdb_tablemetadata)
-                FROM SERVER #{server_name} INTO #{@schema};
-              GRANT SELECT ON #{@schema}.cdb_tablemetadata TO publicuser;
-            }
-        end
-        execute_as_superuser create_foreign_table_command
-      end
-
       def create_foreign_table_command
         v = %{
           IMPORT FOREIGN SCHEMA #{@schema} LIMIT TO (#{foreign_table_name})
@@ -105,7 +100,18 @@ module CartoDB
       end
 
       def run_post_create
-        print "IMPORTER: NOOP run_post_create\n"
+        # Ensure here that the remote cdb_tablemetadata are imported
+        for tabname in ['cdb_tablemetadata', 'cdb_tablemetadata_text']
+          begin
+            execute_as_superuser %{select '#{@schema}.#{tabname}'::regclass}
+          rescue => e
+            execute_as_superuser %{
+              IMPORT FOREIGN SCHEMA cartodb LIMIT TO (#{tabname})
+                FROM SERVER #{server_name} INTO #{@schema};
+              GRANT SELECT ON #{@schema}.#{tabname} TO publicuser;
+            }
+          end
+        end
       end
 
       def run_post_create_ensure
