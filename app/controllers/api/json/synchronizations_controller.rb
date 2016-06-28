@@ -199,12 +199,12 @@ class Api::Json::SynchronizationsController < Api::ApplicationController
       create_visualization:   ["true", true].include?(params[:create_vis])
     }
 
-    if params[:remote_visualization_id].present?
-      external_source = get_external_source(params[:remote_visualization_id])
-      options.merge!( { data_source: external_source.import_url.presence } )
-    elsif params[:fdw].present?
+    if params[:fdw].present?
       options[:service_name] = 'connector'
       options[:service_item_id] = params[:fdw]
+    elsif params[:remote_visualization_id].present?
+      external_source = get_external_source(params[:remote_visualization_id])
+      options.merge!( { data_source: external_source.import_url.presence } )
     else
       url = params[:url]
       validate_url!(url) unless Rails.env.development? || Rails.env.test? || url.nil? || url.empty?
