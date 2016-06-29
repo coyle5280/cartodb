@@ -53,9 +53,9 @@ module CartoDB
         print "IMPORTER: raw params #{@params}\n"
         validate_params!
         print "IMPORTER: validated params #{@params}\n"
-        @schema = @user.database_schema
+        @schema = Cartodb::config[:fdw]["remote_schema"] || @user.database_schema
         @table_name = @params['table'] || @job.table_name
-        print "IMPORTER: schemas #{@schema}, #{@job.schema}\n"
+        print "IMPORTER: schema #{@schema}\n"
         print "IMPORTER: table_name #{@params['table_name']}, #{@job.table_name}\n"
         @results = []
         @tracker = nil

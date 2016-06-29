@@ -18,7 +18,7 @@ module CartoDB
       private
 
       def accepted_parameters
-        %w(driver channel host port database table username password)
+        %w(driver channel host port database table username password remote_schema)
       end
 
       def server_options
@@ -43,6 +43,7 @@ module CartoDB
 
       def run_pre_create
         run_create_extension
+        run_create_schema
       end
 
       def run_create_server
@@ -55,6 +56,13 @@ module CartoDB
 
       def run_create_extension
         execute_as_superuser %{ CREATE EXTENSION IF NOT EXISTS #{channel_name} }
+      end
+
+      def run_create_schema
+        execute_as_superuser %{ CREATE SCHEMA IF NOT EXISTS "#{@schema}" }
+        execute_as_superuser %{ GRANT CREATE,USAGE ON SCHEMA "#{@schema}" TO postgres }
+        execute_as_superuser %{ GRANT CREATE,USAGE ON SCHEMA "#{@schema}" TO "#{@user.database_username}" }
+        execute_as_superuser %{ GRANT USAGE ON SCHEMA "#{@schema}" TO publicuser }
       end
 
       def create_server_command
