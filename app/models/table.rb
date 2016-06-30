@@ -583,8 +583,9 @@ class Table
       begin
         user_database.run(%{DROP TABLE IF EXISTS #{qualified_table_name}})
       rescue => e
-        if e.message.include? "DROP FOREIGN TABLE"
-          user_database.run(%{DROP FOREIGN TABLE IF EXISTS #{qualified_table_name}})
+        if e.message.include? "Use DROP VIEW"
+          user_database.run(%{DROP VIEW IF EXISTS #{qualified_table_name}})
+          user_database.run(%{DROP FOREIGN TABLE IF EXISTS #{qualified_remote_table_name}})
         else
           raise e
         end
@@ -735,6 +736,8 @@ class Table
     first_columns     = []
     middle_columns    = []
     last_columns      = []
+    print "IMPORTER: app/models/table.rb schema() #{name}"
+    print "IMPORTER: app/models/table.rb owner.database_schema #{owner.database_schema}"
     owner.in_database.schema(name, options.slice(:reload).merge(schema: owner.database_schema)).each do |column|
       print "IMPORTER: #{column}"
       next if column[0] == THE_GEOM_WEBMERCATOR
@@ -1249,6 +1252,10 @@ class Table
 
   def qualified_table_name
     "\"#{owner.database_schema}\".\"#{@user_table.name}\""
+  end
+
+  def qualified_remote_table_name
+    "\"commondata\".\"#{@user_table.name}\""
   end
 
   def database_schema
