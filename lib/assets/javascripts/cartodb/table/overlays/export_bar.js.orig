@@ -1,9 +1,12 @@
 /* global $:false, _:false */
 cdb.admin.ExportBarActions = cdb.core.View.extend({
+<<<<<<< 13a86c135ab5065a15e45ae44bce1c03e91d0267
   events: {
     'click .do_export': '_doExport',
     'click .cancel': '_cancel'
   },
+=======
+>>>>>>> Set export size textboxes on resize
 
   initialize: function () {
     this.template_base = cdb.templates.getTemplate('table/overlays/export_bar_actions');
