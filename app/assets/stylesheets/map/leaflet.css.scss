@@ -245,6 +245,33 @@
 	border: 5px solid #bbb;
 	}
 
+.leaflet-draw-section {
+	position: relative;
+	top: 110px;
+	left: 58px;
+
+	.leaflet-draw-toolbar {
+		width: 28px;
+
+		a {
+			background-image: url('/assets/3.23.57/images/sprites/leaflet-spritesheet.svg');
+			background-size: 270px 30px;
+			background-repeat: no-repeat;
+		}
+
+	 .leaflet-draw-draw-polygon {
+			background-position: -31px -2px;
+		}
+
+		.leaflet-draw-draw-rectangle {
+			background-position: -62px -2px;
+		}
+
+		.leaflet-draw-draw-circle {
+			background-position: -92px -2px;
+		}
+	}
+}
 
 /* Zoom and fade animations */
 
