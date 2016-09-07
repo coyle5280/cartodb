@@ -245,15 +245,15 @@
 	border: 5px solid #bbb;
 	}
 
-.leaflet-draw-section {
+.leaflet-draw {
 	position: relative;
-	top: 110px;
-	left: 58px;
+	top: 250px;
+	left: 11px;
 
 	.leaflet-draw-toolbar {
-		width: 28px;
 
 		a {
+            width: 28px;
 			background-image: url('/assets/3.23.57/images/sprites/leaflet-spritesheet.svg');
 			background-size: 270px 30px;
 			background-repeat: no-repeat;
