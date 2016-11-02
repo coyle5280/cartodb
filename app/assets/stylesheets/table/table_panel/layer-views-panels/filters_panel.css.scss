@@ -186,6 +186,9 @@
 
       width: 385px;
       margin: 0;
+      
+
+
 
       .filter { // generic styles for all the filters
         position:relative;
@@ -196,6 +199,21 @@
         @include box-shadow(0px 4px 4px #EDEDED);
 
         text-align:left;
+        //TODO
+        input.filterInput {
+          background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
+          border: 1px solid #999;
+          padding: 3px 18px 3px 4px; 
+          border-radius: 3px;
+          transition: background 0.4s;
+        }
+        input.filterInput.x { background-position: right 5px center; }
+        input.filterInput.x { cursor: pointer; }
+        input.filterInput.x::-ms-clear {display: none; width:0; height:0;}
+
+        .filterSelectViewOptions {
+          margin: 0 30px 0 30px
+        }
 
         .header {
           position:relative;
