@@ -187,9 +187,6 @@
       width: 385px;
       margin: 0;
       
-
-
-
       .filter { // generic styles for all the filters
         position:relative;
 
@@ -577,6 +574,7 @@
           &.selected:after  { @include opacity(0); }
           &.selected:before { background: #82D992; @include scale(1); }
           &.selected .value { background: #82D992; color:#fff; }
+          &.selected .value-largeset { background: #82D992; color:#fff; }
 
           .value {
             position:absolute;
@@ -589,6 +587,33 @@
             color:#82D992;
 
             @include simple-transition(background-color, 100ms);
+          }
+
+          .value-largeset {
+            position:absolute;
+            top: 10px; right: 25px;
+            font-size:10px;
+            padding: 2px 4px;
+            border:1px solid #82D992;
+            background:#fff;
+            @include border-radius(2px);
+            color:#82D992;
+
+            @include simple-transition(background-color, 100ms);
+          }
+
+          .remove-item {
+            float: right;
+            margin-top: 4px;
+            margin-right: 5px;
+
+            @include opacity(1);
+
+            @include size(13px);
+            @include simple-transition(opacity, 150ms);
+            @include common-sprite(close_grey);
+
+            &:hover {@include common-sprite(close_grey, $offset-y:-13px);}
           }
         }
       }
