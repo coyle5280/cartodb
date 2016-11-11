@@ -607,20 +607,23 @@
             @include simple-transition(background-color, 100ms);
           }
 
+          &:hover .remove-item { @include opacity(1); }
+
           .remove-item {
             float: right;
-            margin-top: 4px;
+            margin-top: 0;
             margin-right: 5px;
             min-height: 13px;
-
-            @include opacity(1);
+            @include opacity(0);
 
             @include size(13px);
+            @include position(17px, 0, false, false);
             @include simple-transition(opacity, 150ms);
             @include common-sprite(close_grey);
 
             &:hover {@include common-sprite(close_grey, $offset-y:-13px);}
           }
+
         }
       }
     } // filter.selection
@@ -633,6 +636,17 @@
       .empty  { display:none; }
 
       .loading   { display:block; }
+
+      .range-text {
+        padding: 1px 3px 1px 3px;
+        display: inline;
+      }
+
+      .range-text:hover {
+        padding: 0 2px 0 2px;
+        border: solid thin #666;
+        cursor: pointer;
+      }
 
       .range-number { height: 35px; }
       .range-number input { width: 45%; }
