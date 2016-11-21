@@ -648,6 +648,29 @@
         cursor: pointer;
       }
 
+      .range-date-text {
+        padding: 1px 3px 1px 3px;
+        display: inline;
+      }
+
+      .range-date-text:hover {
+        padding: 0 2px 0 2px;
+        border: solid thin #666;
+        cursor: pointer;
+      }
+
+      .date-min, .date-max {
+        width: 72px;
+        cursor: text;
+      }
+
+      .ui-datepicker-div {
+        position: absolute;
+        z-index: 1;
+        top: 68px;
+        left: 30px;        
+      }
+
       .range-number { height: 35px; }
       .range-number input { width: 45%; }
       .range-number .subtext { display: none; color: #666666; font-size: 11px; }
