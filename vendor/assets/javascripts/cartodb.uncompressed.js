@@ -1,6 +1,6 @@
 // cartodb.js version: 3.15.9
 // uncompressed version: cartodb.uncompressed.js
-// sha: 1ee7c836065040ca033c2d18c64b865c176b935f
+// sha: c6457554046c214981e393c513bb4c4f7b3f414c
 (function() {
   var define;  // Undefine define (require.js), see https://github.com/CartoDB/cartodb.js/issues/543
   var root = this;
@@ -33087,13 +33087,18 @@ cdb.geo.ui.Tooltip = cdb.geo.ui.InfoBox.extend({
 
             // loop through content values
             data.fields = c.fields;
-
             // alternamte names
             var names = this.options.alternative_names;
             if (names) {
               for(var i = 0; i < data.fields.length; ++i) {
                 var f = data.fields[i];
-                f.title = names[f.title] || f.title;
+                if(f.title){
+                  f.title = names[f.alias] || names[f.title] || f.title;
+                  //If alias has alternate name remove alias so that title is shown instead (hacky??)
+                  if(f.title === names[f.alias]){
+                    f.alias = null
+                  }
+                }
               }
             }
             this.show(pos, data);
@@ -33208,8 +33213,7 @@ cdb.geo.ui.Tooltip = cdb.geo.ui.InfoBox.extend({
     return this;
   }
 
-});
-/**
+});/**
  *  FullScreen widget:
  *
  *  var widget = new cdb.ui.common.FullScreen({
