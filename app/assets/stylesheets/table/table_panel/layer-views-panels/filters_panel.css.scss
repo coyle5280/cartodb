@@ -189,6 +189,26 @@
       padding: 3px;
     }
 
+    .drawDetails {
+      padding: 0 50px 5px 10px;
+    }
+
+    span.drawRadius {
+      outline: none;
+      display: block;
+      border: solid thin #fff;
+      width: 111px;
+      height: 20px;
+      text-align: right;
+      color: #000;
+      padding-right: 3px;
+
+      &:hover {
+        border: solid thin #bbb;      
+      }
+    }
+
+
     ul.filters {
       position:relative;
 
