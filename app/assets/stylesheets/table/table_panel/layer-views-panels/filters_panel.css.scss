@@ -191,6 +191,10 @@
 
     .drawDetails {
       padding: 0 50px 5px 10px;
+
+      a {
+        cursor: 'pointer';
+      }
     }
 
     span.drawRadius {
