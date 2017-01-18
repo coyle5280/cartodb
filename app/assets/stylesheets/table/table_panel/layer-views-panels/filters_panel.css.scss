@@ -446,7 +446,14 @@
 
         }
 
-        .scroll { width: 380px; max-height: 156px; overflow: hidden; outline:none; }
+        .scroll { 
+          width: 380px; 
+          max-height: 156px; 
+          overflow: hidden; 
+          outline:none;
+          overflow-y: scroll; 
+          overflow-x: hidden 
+          }
 
       } // data
 
