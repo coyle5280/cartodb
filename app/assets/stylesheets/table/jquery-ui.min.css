@@ -25,7 +25,7 @@
 .ui-front{z-index:100}
 
 
-.ui-state-disabled{cursor:default!important}
+/*.ui-state-disabled{cursor:default!important}*/
 
 
 .ui-icon{display:block;text-indent:-99999px;overflow:hidden;background-repeat:no-repeat}

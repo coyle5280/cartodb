@@ -99,7 +99,7 @@
     .scrollpane {
       overflow: auto;
       outline: none;
-
+      min-height: 325px;
       &:hover .jspVerticalBar { @include opacity(1); }
 
       .jspContainer { overflow: hidden; position: relative; }
@@ -702,7 +702,14 @@
       .date-min, .date-max {
         width: 80px;
         cursor: text;
+
+          
+
       }
+
+      .has-focus {
+          border-color: red;
+        }
 
       .ui-datepicker-div {
         position: absolute;

@@ -1632,7 +1632,6 @@ L.Edit.Circle = L.Edit.SimpleShape.extend({
 		var metric = (localStorage.getItem('units') === 'english') ? false : true;
 		var moveLatLng = this._moveMarker.getLatLng(),
 			radius = moveLatLng.distanceTo(latlng);
-			// debugger
 		this._shape.setRadius(radius);
 		this._tooltip.updateContent({
 			text: L.drawLocal.edit.handlers.edit.tooltip.text,
