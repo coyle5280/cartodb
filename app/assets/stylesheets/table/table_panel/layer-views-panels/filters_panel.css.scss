@@ -99,7 +99,7 @@
     .scrollpane {
       overflow: auto;
       outline: none;
-      min-height: 325px;
+      min-height: 375px;
       &:hover .jspVerticalBar { @include opacity(1); }
 
       .jspContainer { overflow: hidden; position: relative; }
@@ -568,6 +568,13 @@
         padding: 0;
         width: 325px;
 
+        .li-focus-item {
+            border-top-color: red;
+            border-bottom: solid;
+            border-bottom-width: 1px;
+            border-bottom-color: red
+          }
+
         li {
           clear:both;
           overflow:hidden;
@@ -580,6 +587,8 @@
           border-top: 1px solid rgba(#999, .25);
 
           cursor: pointer;
+
+          
 
           p {
 
