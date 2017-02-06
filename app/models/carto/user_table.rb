@@ -91,6 +91,12 @@ module Carto
       self.table_id = service.get_table_id
     end
 
+    def alias_columns
+      JSON.parse(super)
+    rescue JSON::ParserError
+      {}
+    end
+
     private
 
     def fully_qualified_name
