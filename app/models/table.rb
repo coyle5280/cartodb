@@ -47,6 +47,9 @@ class Table
   PUBLIC_ATTRIBUTES = {
     id: :id,
     name: :name,
+    aliases: :aliases,
+    alias: :alias,
+    schema_alias: :schema_alias,
     privacy: :privacy_text,
     schema: :schema,
     updated_at: :updated_at,
@@ -58,10 +61,7 @@ class Table
     table_visualization: :table_visualization,
     dependent_visualizations: :serialize_dependent_visualizations,
     non_dependent_visualizations: :serialize_non_dependent_visualizations,
-    synchronization: :serialize_synchronization,
-    aliases: :aliases,
-    alias: :alias,
-    schema_alias: :schema_alias
+    synchronization: :serialize_synchronization
   }.freeze
 
   DEFAULT_THE_GEOM_TYPE = 'geometry'
