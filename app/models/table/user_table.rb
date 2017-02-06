@@ -295,7 +295,7 @@ class UserTable < Sequel::Model
   end
 
   def aliases=(hash)
-    super(hash.to_json)
+    super((hash || {}).to_json)
   end
 
   def aliases
