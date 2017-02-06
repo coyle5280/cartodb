@@ -160,6 +160,7 @@ module CartoDB
           end
           data = JSON.parse(response.response_body)
           table_visualization_map_id = data['table_visualization']['map_id']
+          table.aliases = data['aliases']
 
           # Get remote vis layer configs
           url = "#{remote_base_url}/api/v1/maps/#{table_visualization_map_id}/layers"

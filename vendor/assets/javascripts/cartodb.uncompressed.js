@@ -1,6 +1,6 @@
 // cartodb.js version: 3.15.9
 // uncompressed version: cartodb.uncompressed.js
-// sha: 86cbf3f77bb38d7669df4cf4e304ea157d85411a
+// sha: 044b2a698682ab3b40af215c411890fed4f8d2e1
 (function() {
   var define;  // Undefine define (require.js), see https://github.com/CartoDB/cartodb.js/issues/543
   var root = this;
@@ -26109,6 +26109,42 @@ if (typeof window !== 'undefined') {
       cdb._loadJST();
       root.cdb.god = new Backbone.Model();
 
+      root.cdb.god.adjustListFocus = function(e) {
+        if (cdb.god.currentFilterLi) {
+            if (e.which === 40){
+                e.preventDefault();
+                e.stopPropagation();
+                next = cdb.god.currentFilterLi.next();
+                if(next.length > 0){
+                    cdb.god.currentFilterLi.removeClass('li-focus-item');
+                    cdb.god.currentFilterLi = next;
+                    cdb.god.currentFilterLi.addClass('li-focus-item');
+                }
+            } else if(e.which === 38){
+                e.preventDefault();
+                e.stopPropagation();
+                next = cdb.god.currentFilterLi.prev();
+                if(next.length > 0){
+                    cdb.god.currentFilterLi.removeClass('li-focus-item');
+                    cdb.god.currentFilterLi = next;
+                    cdb.god.currentFilterLi.addClass('li-focus-item');
+                }
+            } else if (e.which === 13) {
+                cdb.god.currentFilterLi.click();
+            }
+            var scrollContainer = cdb.god.currentFilterLi.scrollParent();
+            // scrollContainer.animate({
+            //     scrollTop: cdb.god.currentFilterLi.offset().top - scrollContainer.offset().top + scrollContainer.scrollTop()
+            // });
+            scrollContainer.scrollTop(
+                cdb.god.currentFilterLi.offset().top - scrollContainer.offset().top + scrollContainer.scrollTop()
+            );
+        }
+      }
+
+      $(window).keydown(root.cdb.god.adjustListFocus);
+
+
       ready && ready();
     };
 
@@ -30518,26 +30554,25 @@ cdb.geo.ui.InfowindowModel = Backbone.Model.extend({
   sortFields: function() {
     this.get('fields').sort(function(a, b) { return a.position - b.position; });
   },
-
-  _addField: function(fieldName, at) {
+  _addField: function(fieldName, at, alias) {
     var dfd = $.Deferred();
     if(!this.containsField(fieldName)) {
       var fields = this.get('fields');
       if(fields) {
         at = at === undefined ? fields.length: at;
-        fields.push({ name: fieldName, title: true, position: at });
+        fields.push({ name: fieldName, title: true, position: at, alias: alias });
       } else {
         at = at === undefined ? 0 : at;
-        this.set('fields', [{ name: fieldName, title: true, position: at }], { silent: true});
+        this.set('fields', [{ name: fieldName, title: true, position: at, alias: alias }], { silent: true});
       }
     }
     dfd.resolve();
     return dfd.promise();
   },
 
-  addField: function(fieldName, at) {
+  addField: function(fieldName, at, alias) {
     var self = this;
-    $.when(this._addField(fieldName, at)).then(function() {
+    $.when(this._addField(fieldName, at, alias)).then(function() {
       self.sortFields();
       self.trigger('change:fields');
       self.trigger('add:fields');
@@ -30594,8 +30629,14 @@ cdb.geo.ui.InfowindowModel = Backbone.Model.extend({
     return _.contains(_(fields).pluck('name'), fieldName);
   },
 
+  containsAlias: function(aliasName) {
+    var fields = this.get('fields') || [];
+    return _.contains(_(fields).pluck('alias'), aliasName);
+  },
+  
+
   removeField: function(fieldName) {
-    if(this.containsField(fieldName)) {
+    if(this.containsField(fieldName) || this.containsAlias(fieldName)) {
       var fields = this._cloneFields() || [];
       var idx = _.indexOf(_(fields).pluck('name'), fieldName);
       if(idx >= 0) {
@@ -30631,6 +30672,7 @@ cdb.geo.ui.InfowindowModel = Backbone.Model.extend({
         render_fields.push({
           title: field.title ? field.name : null,
           value: attributes[field.name],
+          alias: field.alias ? field.alias : null,
           index: j
         });
       }
@@ -30885,11 +30927,13 @@ cdb.geo.ui.Infowindow = cdb.core.View.extend({
     }
 
     //Get the alternative title
-    var alternative_name = this.model.getAlternativeName(attr.title);
+    var title = (attr.alias) ? attr.alias : attr.title;
+    var alternative_name = this.model.getAlternativeName(title);
 
     if (attr.title && alternative_name) {
       // Alternative title
       attr.title = alternative_name;
+      attr.alias = null;
     } else if (attr.title) {
       // Remove '_' character from titles
       attr.title = attr.title.replace(/_/g,' ');
@@ -33079,13 +33123,18 @@ cdb.geo.ui.Tooltip = cdb.geo.ui.InfoBox.extend({
 
             // loop through content values
             data.fields = c.fields;
-
             // alternamte names
             var names = this.options.alternative_names;
             if (names) {
               for(var i = 0; i < data.fields.length; ++i) {
                 var f = data.fields[i];
-                f.title = names[f.title] || f.title;
+                if(f.title){
+                  f.title = names[f.alias] || names[f.title] || f.title;
+                  //If alias has alternate name remove alias so that title is shown instead (hacky??)
+                  if(f.title === names[f.alias]){
+                    f.alias = null
+                  }
+                }
               }
             }
             this.show(pos, data);
@@ -33200,8 +33249,7 @@ cdb.geo.ui.Tooltip = cdb.geo.ui.InfoBox.extend({
     return this;
   }
 
-});
-/**
+});/**
  *  FullScreen widget:
  *
  *  var widget = new cdb.ui.common.FullScreen({
