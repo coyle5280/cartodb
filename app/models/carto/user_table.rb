@@ -113,7 +113,7 @@ module Carto
 
     def schema_alias=(hash)
       new_aliases = aliases
-      new_aliases[:columns] = hash
+      new_aliases[:columns] = hash || {}
       self.aliases = new_aliases
     end
 
