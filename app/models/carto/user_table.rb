@@ -91,7 +91,7 @@ module Carto
       self.table_id = service.get_table_id
     end
 
-    def alias_columns
+    def schema_alias
       JSON.parse(super)
     rescue JSON::ParserError
       {}

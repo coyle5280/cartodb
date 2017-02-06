@@ -745,7 +745,7 @@ class Table
   end
 
   def schema_alias
-    JSON.parse(@user_table.alias_columns)
+    @user_table.schema_alias
   end
 
   def schema(options = {})
