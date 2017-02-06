@@ -679,10 +679,6 @@ class Table
     end
   end
 
-  def alias
-    @user_table.alias
-  end
-
   def name=(value)
     value = value.downcase if value
     return if value == @user_table[:name] || value.blank?
@@ -743,10 +739,6 @@ class Table
     options[:connection]['SELECT pg_total_relation_size(?) AS size', name].first[:size] / 2
   rescue Sequel::DatabaseError
     nil
-  end
-
-  def schema_alias
-    @user_table.schema_alias
   end
 
   def schema(options = {})
@@ -1364,6 +1356,18 @@ class Table
   end
 
   private
+
+  def alias
+    @user_table.alias
+  end
+
+  def schema_alias
+    @user_table.schema_alias
+  end
+
+  def aliases
+    @user_table.aliases
+  end
 
   def external_source_visualization
     @user_table.
