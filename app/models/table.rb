@@ -45,23 +45,24 @@ class Table
   RESERVED_COLUMN_NAMES = %W{ oid tableoid xmin cmin xmax cmax ctid ogc_fid }
 
   PUBLIC_ATTRIBUTES = {
-      :id                           => :id,
-      :name                         => :name,
-      :alias                        => :alias,
-      :privacy                      => :privacy_text,
-      :schema                       => :schema,
-      :schema_alias                 => :schema_alias,
-      :updated_at                   => :updated_at,
-      :rows_counted                 => :rows_estimated,
-      :table_size                   => :table_size,
-      :map_id                       => :map_id,
-      :description                  => :description,
-      :geometry_types               => :geometry_types,
-      :table_visualization          => :table_visualization,
-      :dependent_visualizations     => :serialize_dependent_visualizations,
-      :non_dependent_visualizations => :serialize_non_dependent_visualizations,
-      :synchronization              => :serialize_synchronization
-  }
+    id: :id,
+    name: :name,
+    privacy: :privacy_text,
+    schema: :schema,
+    updated_at: :updated_at,
+    rows_counted: :rows_estimated,
+    table_size: :table_size,
+    map_id: :map_id,
+    description: :description,
+    geometry_types: :geometry_types,
+    table_visualization: :table_visualization,
+    dependent_visualizations: :serialize_dependent_visualizations,
+    non_dependent_visualizations: :serialize_non_dependent_visualizations,
+    synchronization: :serialize_synchronization,
+    aliases: :aliases,
+    alias: :alias,
+    schema_alias: :schema_alias
+  }.freeze
 
   DEFAULT_THE_GEOM_TYPE = 'geometry'
 
