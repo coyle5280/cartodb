@@ -45,23 +45,23 @@ class Table
   RESERVED_COLUMN_NAMES = %W{ oid tableoid xmin cmin xmax cmax ctid ogc_fid }
 
   PUBLIC_ATTRIBUTES = {
-      :id                           => :id,
-      :name                         => :name,
-      :alias                        => :alias,
-      :privacy                      => :privacy_text,
-      :schema                       => :schema,
-      :schema_alias                 => :schema_alias,
-      :updated_at                   => :updated_at,
-      :rows_counted                 => :rows_estimated,
-      :table_size                   => :table_size,
-      :map_id                       => :map_id,
-      :description                  => :description,
-      :geometry_types               => :geometry_types,
-      :table_visualization          => :table_visualization,
-      :dependent_visualizations     => :serialize_dependent_visualizations,
-      :non_dependent_visualizations => :serialize_non_dependent_visualizations,
-      :synchronization              => :serialize_synchronization
-  }
+    id: :id,
+    name: :name,
+    alias: :alias,
+    schema_alias: :schema_alias,
+    privacy: :privacy_text,
+    schema: :schema,
+    updated_at: :updated_at,
+    rows_counted: :rows_estimated,
+    table_size: :table_size,
+    map_id: :map_id,
+    description: :description,
+    geometry_types: :geometry_types,
+    table_visualization: :table_visualization,
+    dependent_visualizations: :serialize_dependent_visualizations,
+    non_dependent_visualizations: :serialize_non_dependent_visualizations,
+    synchronization: :serialize_synchronization
+  }.freeze
 
   DEFAULT_THE_GEOM_TYPE = 'geometry'
 
@@ -678,10 +678,6 @@ class Table
     end
   end
 
-  def alias
-    @user_table.alias
-  end
-
   def name=(value)
     value = value.downcase if value
     return if value == @user_table[:name] || value.blank?
@@ -742,10 +738,6 @@ class Table
     options[:connection]['SELECT pg_total_relation_size(?) AS size', name].first[:size] / 2
   rescue Sequel::DatabaseError
     nil
-  end
-
-  def schema_alias
-    JSON.parse(@user_table.alias_columns)
   end
 
   def schema(options = {})
@@ -1363,6 +1355,14 @@ class Table
   end
 
   private
+
+  def alias
+    @user_table.alias
+  end
+
+  def schema_alias
+    @user_table.schema_alias
+  end
 
   def external_source_visualization
     @user_table.
