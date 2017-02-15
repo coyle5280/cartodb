@@ -1354,15 +1354,23 @@ class Table
                           table_name: name)
   end
 
-  private
+  def alias=(alias_)
+    @user_table.alias = alias_
+  end
 
   def alias
     @user_table.alias
   end
 
+  def schema_alias=(schema_alias)
+    @user_table.schema_alias = schema_alias
+  end
+
   def schema_alias
     @user_table.schema_alias
   end
+
+  private
 
   def external_source_visualization
     @user_table.
