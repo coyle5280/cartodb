@@ -99,7 +99,7 @@
     .scrollpane {
       overflow: auto;
       outline: none;
-
+      min-height: 375px;
       &:hover .jspVerticalBar { @include opacity(1); }
 
       .jspContainer { overflow: hidden; position: relative; }
@@ -413,7 +413,14 @@
 
         }
 
-        .scroll { width: 380px; max-height: 156px; overflow: hidden; outline:none; }
+        .scroll { 
+          width: 380px; 
+          max-height: 156px; 
+          overflow: hidden; 
+          outline:none;
+          overflow-y: scroll; 
+          overflow-x: hidden;
+        }
 
       } // data
 
@@ -527,6 +534,13 @@
         margin: 0 0 0 30px;
         padding: 0;
         width: 325px;
+
+        .li-focus-item {
+          border-top-color: red;
+          border-bottom: solid;
+          border-bottom-width: 1px;
+          border-bottom-color: red
+        }
 
         li {
           clear:both;
@@ -662,6 +676,9 @@
       .date-min, .date-max {
         width: 80px;
         cursor: text;
+      }
+      .has-focus {
+        border-color: red;
       }
 
       .ui-datepicker-div {
