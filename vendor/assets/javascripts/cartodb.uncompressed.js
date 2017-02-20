@@ -1,6 +1,6 @@
 // cartodb.js version: 3.15.9
 // uncompressed version: cartodb.uncompressed.js
-// sha: c6457554046c214981e393c513bb4c4f7b3f414c
+// sha: 044b2a698682ab3b40af215c411890fed4f8d2e1
 (function() {
   var define;  // Undefine define (require.js), see https://github.com/CartoDB/cartodb.js/issues/543
   var root = this;
@@ -26108,6 +26108,42 @@ if (typeof window !== 'undefined') {
 
       cdb._loadJST();
       root.cdb.god = new Backbone.Model();
+
+      root.cdb.god.adjustListFocus = function(e) {
+        if (cdb.god.currentFilterLi) {
+            if (e.which === 40){
+                e.preventDefault();
+                e.stopPropagation();
+                next = cdb.god.currentFilterLi.next();
+                if(next.length > 0){
+                    cdb.god.currentFilterLi.removeClass('li-focus-item');
+                    cdb.god.currentFilterLi = next;
+                    cdb.god.currentFilterLi.addClass('li-focus-item');
+                }
+            } else if(e.which === 38){
+                e.preventDefault();
+                e.stopPropagation();
+                next = cdb.god.currentFilterLi.prev();
+                if(next.length > 0){
+                    cdb.god.currentFilterLi.removeClass('li-focus-item');
+                    cdb.god.currentFilterLi = next;
+                    cdb.god.currentFilterLi.addClass('li-focus-item');
+                }
+            } else if (e.which === 13) {
+                cdb.god.currentFilterLi.click();
+            }
+            var scrollContainer = cdb.god.currentFilterLi.scrollParent();
+            // scrollContainer.animate({
+            //     scrollTop: cdb.god.currentFilterLi.offset().top - scrollContainer.offset().top + scrollContainer.scrollTop()
+            // });
+            scrollContainer.scrollTop(
+                cdb.god.currentFilterLi.offset().top - scrollContainer.offset().top + scrollContainer.scrollTop()
+            );
+        }
+      }
+
+      $(window).keydown(root.cdb.god.adjustListFocus);
+
 
       ready && ready();
     };
